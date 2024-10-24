@@ -68,9 +68,10 @@ resource "google_compute_router" "cloud_router" {
 }
 
 resource "google_compute_router_nat" "vpc_nat" {
-  name   = var.network_name
-  router = google_compute_router.cloud_router.name
-  region = google_compute_router.cloud_router.region
+  depends_on = [google_compute_router.cloud_router, google_compute_subnetwork.subnetwork, google_compute_address.net_ip]
+  name       = var.network_name
+  router     = google_compute_router.cloud_router.name
+  region     = google_compute_router.cloud_router.region
 
   nat_ip_allocate_option = "MANUAL_ONLY"
   nat_ips                = [google_compute_address.net_ip.self_link]
