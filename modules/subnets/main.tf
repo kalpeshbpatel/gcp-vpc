@@ -50,3 +50,38 @@ resource "google_compute_subnetwork" "subnetwork" {
   stack_type       = lookup(each.value, "stack_type", null)
   ipv6_access_type = lookup(each.value, "ipv6_access_type", null)
 }
+
+resource "google_compute_address" "net_ip" {
+  name   = var.network_name
+  region = var.region
+}
+
+
+resource "google_compute_router" "cloud_router" {
+  name    = var.network_name
+  region  = var.region
+  network = var.network_name
+
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_router_nat" "vpc_nat" {
+  name   = var.network_name
+  router = google_compute_router.cloud_router.name
+  region = google_compute_router.cloud_router.region
+
+  nat_ip_allocate_option = "MANUAL_ONLY"
+  nat_ips                = [google_compute_address.net_ip.self_link]
+
+  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+
+  dynamic "subnetwork" {
+    for_each = [for subnet in var.subnets : subnet if subnet.subnet_private_access == "true"]
+    content {
+      name                    = subnetwork.value.subnet_name
+      source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+    }
+  }
+}

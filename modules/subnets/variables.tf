@@ -1,3 +1,8 @@
+variable "region" {
+  type    = string
+  default = ""
+}
+
 variable "project_id" {
   description = "The ID of the project where subnets will be created"
   type        = string

@@ -23,6 +23,7 @@ module "subnets" {
   source           = "./modules/subnets"
   project_id       = var.project_id
   network_name     = module.vpc.network_name
+  region           = var.region
   subnets          = var.subnets
   secondary_ranges = var.secondary_ranges
 }
